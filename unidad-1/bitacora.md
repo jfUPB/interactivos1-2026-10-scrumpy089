@@ -1,6 +1,6 @@
 # Unidad 1
 
-[Actividades]{https://juanferfranco.github.io/interactivos1-2026-10/units/unit1/}
+[Actividades](https://juanferfranco.github.io/interactivos1-2026-10/units/unit1/)
 
 ## Bitácora de proceso de aprendizaje
 
@@ -19,5 +19,6 @@
 
 
 ## Bitácora de reflexión
+
 
 
