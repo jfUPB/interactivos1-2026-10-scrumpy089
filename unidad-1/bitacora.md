@@ -1,13 +1,17 @@
 # Unidad 1
 
+[Actividades]{https://juanferfranco.github.io/interactivos1-2026-10/units/unit1/}
+
 ## Bitácora de proceso de aprendizaje
 
 ### Actividad 01
 
-``` js
+**_¿Qué es un sistema físico interactivo?_**
 
-```
-[Google](https://www.google.com/webhp?hl=es&sa=X&ved=0ahUKEwi1r8m6tp2SAxU5RDABHVlmH68QPAgJ)
+
+
+**_¿Cómo podrías aplicar lo que has visto en tu perfil profesional?_**
+
 
 
 ## Bitácora de aplicación 
@@ -15,4 +19,5 @@
 
 
 ## Bitácora de reflexión
+
 
