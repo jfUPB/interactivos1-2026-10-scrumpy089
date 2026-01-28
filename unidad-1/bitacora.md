@@ -30,7 +30,9 @@ desarrollo cruzado
 
 ### Actividad 04
 
+**_¿Por qué no funcionaba el programa con was_pressed() y por qué funciona con is_pressed()?_**
 
+según el segundo paso: "Si usas is_pressed(), el programa podría enviar múltiples mensajes si el botón se mantiene presionado", se habia intentado usar _was_pressed()_ y como se menciona en el mismo paso, solamente genera un click cuando el boton es presionado, ocasionando que el cambio de color solamente sea momentaneo sin importar que se esté dejando presionado, en cambio, _is_pressed()_, puede generar varios clicks cuando se esta presionando el boton permitiendo que se mantenga el color deseado  
 
 ## Bitácora de aplicación 
 
@@ -119,6 +121,7 @@ En p5.js reutilicé el codigo de la actividad 3 y descarté las partes no releva
 la posicion del circulo esta escrito asi: (PositionX, height / 2), permitiendo la movilizacion del circulo
 
 ## Bitácora de reflexión
+
 
 
 
