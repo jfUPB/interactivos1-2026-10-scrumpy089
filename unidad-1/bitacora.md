@@ -24,15 +24,23 @@ Es una forma de creación artistica en la que el artista crea un sistema que lue
 
 aaaaaa
 
-### Actividad 3
+### Actividad 03
 
 desarrollo cruzado
 
+### Actividad 04
+
+
+
 ## Bitácora de aplicación 
+
+### Actividad 05
+
 
 
 
 ## Bitácora de reflexión
+
 
 
 
