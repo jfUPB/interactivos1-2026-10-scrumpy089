@@ -57,6 +57,10 @@ while True:
 
 **p5.js**
 
+index.html
+```
+<script src="https://unpkg.com/@gohai/p5.webserial@^1/libraries/p5.webserial.js"></script>
+```
 ```js
 let port;
 let connectBtn;
@@ -124,6 +128,10 @@ la posicion del circulo esta escrito asi: (PositionX, height / 2), permitiendo l
 
 ### Actividad 06
 
+El sistema fisico interactivo funciona asi:
+primero se hace el codigo para exportarlo las funciones al micro:bit, es necesario importar la biblioteca del micro:bit que es la que permite interactuar con el mismo y es el que tiene un set de funciones preestablecidas,
+despues inicializar la comunicación serial, que seria a la velocidad en la que viajan los bits, para un correcto funcionamiento en los programas, micro:bit y p5.js, deben de tener la misma velocidad. Crear los comandos dentro de un while(true) para que siempre se esté ejecutando.
+Ahora por parte del editor p5.js, primero hay que importar la biblioteca que le permite conectarse al micro:bit en el apartado de index.html, despues se inicializa el programa creando un canvas en el que se va a evidenciar el funcionamiento del programa, se crea la conceccion serial que permite la comunicación de los 2 programas y un boton con el que concectarse. finalmente se crea una funcion para que detecte y procese la información recibida por parte del micro:bit, permitiendo asi, que cuando se recibe cierta señal realice determinada accion 
 
 
 
