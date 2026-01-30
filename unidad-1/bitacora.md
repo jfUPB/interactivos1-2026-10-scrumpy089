@@ -122,6 +122,8 @@ la posicion del circulo esta escrito asi: (PositionX, height / 2), permitiendo l
 
 ## Bitácora de reflexión
 
+### Actividad 06
+
 
 
 
