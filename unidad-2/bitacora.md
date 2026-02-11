@@ -6,6 +6,54 @@
 
 ### Actividad 01
 
+- **_¿Cuáles son los estados en el programa?_**
+
+para la primera version solamente hay 1 estado "estado_waitTimeout".
+para la segunda version tiene 2 estados "estado_waitInON" y "estado_waitInOFF".
+  
+- **_¿Cuáles son los eventos en el programa?_**
+
+"ENTRY", Se dispara cuando entras a un estado (en transicion_a()).
+"EXIT", Se dispara cuando sales de un estado (en transicion_a()), aunque en estos estados no lo usan para hacer algo.
+"Timeout", evento que genera el Timer cuando se cumple el tiempo(duration)
+  
+- **_¿Cuáles son las acciones en el programa?_**
+
+    - Encender el pixel
+    ``` py
+      display.set_pixel(self.x, self.y, 9)
+    ```
+
+     - Apagar el pixel
+    ```py
+    display.set_pixel(self.x, self.y, 0)
+    ```
+
+     - Iniciar el temporizador
+    ``` py
+    self.myTimer.start()
+    ```
+
+     - (En la versión 2) Cambiar de estado
+    ``` py
+    self.transicion_a(self.estado_waitInOFF)
+    self.transicion_a(self.estado_waitInON)
+    ```
+
+     - Actualizar timers (para que detecten si ya se cumplió el tiempo)
+    ``` py
+    t.update()
+    ```
+
+     - Poner eventos en cola
+    ``` py
+    post_event("Timeout")
+    ```
+
+     - Procesar eventos de la cola
+    ``` py
+    ev = self.event_queue.pop(0) y luego self.estado_actual(ev)
+    ```
 
 ### Actividad 02
 
@@ -147,4 +195,5 @@ class FSMTask:
 
 
 ## Bitácora de reflexión
+
 
