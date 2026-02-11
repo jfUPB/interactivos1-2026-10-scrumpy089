@@ -186,14 +186,15 @@ class FSMTask:
 ### Actividad 03
 
 
-### Actividad 04
-
 
 
 ## Bitácora de aplicación 
 
 
+### Actividad 04
+
 
 ## Bitácora de reflexión
+
 
 
