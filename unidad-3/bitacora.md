@@ -1,6 +1,8 @@
 # Unidad 3
 
 [Actividades](https://juanferfranco.github.io/interactivos1-2026-10/units/unit3/)
+[Micro:bit](https://python.microbit.org/v/3)
+[p5.js](https://editor.p5js.org/)
 
 ## Bitácora de proceso de aprendizaje
 
@@ -245,3 +247,4 @@
 
 
 ## Bitácora de reflexión
+
