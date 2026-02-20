@@ -13,7 +13,7 @@
 <details>
 <summary>Semaforo</summary>
     
-    ``` py
+ ``` py
   
       from microbit import *
     import utime
@@ -151,13 +151,13 @@
         
         semaforo1.update()
         utime.sleep_ms(20)
-    ```
+```
   
 </details>
 
 ### Actividad 02
 
-    ``` py
+``` py
     
     from microbit import *
     from fsm import FSMTask, ENTRY, EXIT
@@ -241,13 +241,14 @@
             
     
         temporizador.update()
-        utime.sleep_ms(20)
-    ```
+        utime.sleep_ms(20)       
+```
 
 ## Bitácora de aplicación 
 
 
 
 ## Bitácora de reflexión
+
 
 
