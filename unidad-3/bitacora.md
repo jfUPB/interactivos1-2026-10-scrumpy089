@@ -11,7 +11,7 @@
 ### Actividad 01
 
 <details>
-<summary>Semaforo</summary>
+<summary><b>Semaforo</b></summary>
     
  ``` py
   
@@ -158,7 +158,7 @@
 ### Actividad 02
 
 <details>
-    <summary>Codigo de temporizador</summary>
+    <summary><b>Codigo de temporizador</b><br></summary>
 
 **main.py**
 
@@ -248,6 +248,7 @@ while True:
     temporizador.update()
     utime.sleep_ms(20)      
 ```
+<br>
 
 **fsm.py**
 
@@ -308,6 +309,7 @@ class FSMTask:
             if self._state:
                 self._state(ev)
 ```
+<br>
 
 **utils.py**
 
@@ -337,9 +339,12 @@ FILL = make_fill_images()
 
 ## Bitácora de aplicación 
 
-### Aplicacion 04
-Micro🫦
-**main.py**
+### Acticidad 04
+
+<details>
+    <summary><b>Micro:bit</b></summary><br>
+   
+**main.py:**
 ``` py
 from microbit import *
 from fsm import FSMTask, ENTRY, EXIT
@@ -429,8 +434,97 @@ while True:
     temporizador.update()
     utime.sleep_ms(20)
 ```
+<br>
 
-**sketch.js**
+**fsm.py:**
+``` py
+import utime
+
+ENTRY = "ENTRY"
+EXIT  = "EXIT"
+
+class Timer:
+    def __init__(self, owner, event_to_post, duration):
+        self.owner = owner
+        self.event = event_to_post
+        self.duration = duration
+        self.start_time = 0
+        self.active = False
+
+    def start(self, new_duration=None):
+        if new_duration is not None:
+            self.duration = new_duration
+        self.start_time = utime.ticks_ms()
+        self.active = True
+
+    def stop(self):
+        self.active = False
+
+    def update(self):
+        if self.active and utime.ticks_diff(utime.ticks_ms(), self.start_time) >= self.duration:
+            self.active = False
+            self.owner.post_event(self.event)
+
+
+class FSMTask:
+    def __init__(self):
+        self._q = []
+        self._timers = []
+        self._state = None
+
+    def post_event(self, ev):
+        self._q.append(ev)
+
+    def add_timer(self, event, duration):
+        t = Timer(self, event, duration)
+        self._timers.append(t)
+        return t
+
+    def transition_to(self, new_state):
+        if self._state:
+            self._state(EXIT)
+        self._state = new_state
+        self._state(ENTRY)
+
+    def update(self):
+        for t in self._timers:
+            t.update()
+        while self._q:
+            ev = self._q.pop(0)
+            if self._state:
+                self._state(ev)
+```
+<br>
+
+**utils.py:**
+``` py
+from microbit import Image
+
+def make_fill_images(on='9', off='0'):
+    imgs = []
+    for n in range(26):
+        rows = []
+        k = 0
+        for y in range(5):
+            row = []
+            for x in range(5):
+                row.append(on if k < n else off)
+                k += 1
+            rows.append(''.join(row))
+        imgs.append(Image(':'.join(rows)))
+    return imgs
+
+FILL = make_fill_images()
+# Para mostrar usas display.show(FILL[n]) donde n será
+# un valor de 0 a 25
+```
+
+</details>
+
+<details>
+    <summary><b>p5.js</b></summary><br>
+
+**sketch.js:**
 
 ``` js
 const TIMER_LIMITS = {
@@ -489,6 +583,13 @@ class Temporizador extends FSMTask {
     }
   };
 
+  compararPassword(secuencia, mypassword) {
+    for (let i = 0; i < secuencia.length; i++) {
+      if (secuencia[i] !== mypassword[i]) return false;
+    }
+    return true;
+  }
+
   estado_armed = (ev) => {
     if (ev === ENTRY) {
       this.myTimer.start();
@@ -512,6 +613,19 @@ class Temporizador extends FSMTask {
       } else {
         // console.log("hola2");
         this.myTimer.stop();
+      }
+    }
+
+    if (ev === "A" || ev === "B") {
+      this.secuencia.push(ev);
+      if (this.secuencia.length === 3) {
+        // console.log("secuencia longitud")
+        if (this.compararPassword(this.secuencia, this.mypassword)) {
+          this.transitionTo(this.estado_config);
+          this.secuencia = [];
+        } else {
+          this.secuencia = [];
+        }
       }
     }
   };
@@ -557,13 +671,13 @@ function draw() {
   if (port.availableBytes() > 0) {
     let dataRx = port.read(1);
     if (dataRx == "A") {
-      console.log("A")
+      console.log("A");
       temporizador.postEvent("A");
     } else if (dataRx == "B") {
-      console.log("B")
+      console.log("B");
       temporizador.postEvent("B");
     } else if (dataRx == "S") {
-      console.log("S")
+      console.log("S");
       temporizador.postEvent("S");
     }
   }
@@ -629,8 +743,10 @@ function connectBtnClick() {
   }
 }
 ```
+<br>
 
-**index.html**
+**index.html:**
+
 ``` html
 <!DOCTYPE html>
 <html lang="en">
@@ -652,7 +768,9 @@ function connectBtnClick() {
   </body>
 </html>
 ```
-**fsm.js**
+<br>
+
+**fsm.js:**
 
 ``` js
 const ENTRY = "ENTRY";
@@ -719,7 +837,10 @@ class FSMTask {
   }
 }
 ```
+</details>
+
 ## Bitácora de reflexión
+
 
 
 
