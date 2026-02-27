@@ -846,7 +846,7 @@ class FSMTask {
 **Micro:bit :**
 <br>
 
-**main.py**
+**main.py Receptor**
 ``` py
 from microbit import *
 import radio
@@ -872,6 +872,27 @@ while True:
     if accelerometer.was_gesture("shake"):
         uart.write('S')
 ```
+
+**main.py Emisor**
+``` py
+from microbit import *
+import radio
+radio.config(group=240)
+
+radio.on()
+
+while True:
+
+    message = radio.receive()
+
+    if button_a.was_pressed():
+        radio.send('A')
+    if button_b.was_pressed():
+        radio.send('B')
+    if accelerometer.was_gesture("shake"):
+        radio.send('S')
+```
+
 
 <details>
     <summary><b>p5.js</b></summary><br>
@@ -1190,5 +1211,6 @@ class FSMTask {
 }
 ```
 </details>
+
 
 
