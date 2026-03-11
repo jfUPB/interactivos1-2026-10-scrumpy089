@@ -128,65 +128,79 @@ Ctrl + c = apagar servidor
 const { SerialPort } = require("serialport");
 const BaseAdapter = require("./BaseAdapter");
 
-class ParseError extends Error { }
+class ParseError extends Error {}
 
-// ...existing code...
-function parseCsvLine(line) {
-  const raw = String(line || "").trim();
-  if (!raw.startsWith("$")) throw new ParseError("Invalid start token");
+function parseFrame(line) {
+  const trimmed = line.trim();
 
-  const chkMarker = "|CHK:";
-  const chkPos = raw.lastIndexOf(chkMarker);
-  if (chkPos < 0) throw new ParseError("Missing CHK field");
-
-  // payload is everything after '$' up to (but not including) the '|CHK:' part
-  const payload = raw.slice(1, chkPos);
-  const fields = payload.split("|").map(f => f.split(":"));
-
-  const map = {};
-  for (const pair of fields) {
-    if (pair.length < 2) continue;
-    const key = pair[0].trim();
-    const value = pair.slice(1).join(":").trim(); // allow ':' in values if any
-    map[key] = value;
+  if (!trimmed.startsWith("$")) {
+    throw new ParseError("Frame does not start with $");
   }
 
-  if (!("T" in map && "X" in map && "Y" in map && "A" in map && "B" in map)) {
+  const body = trimmed.slice(1);
+  const parts = body.split("|");
+
+  if (parts.length !== 6) {
+    throw new ParseError(`Expected 6 fields, got ${parts.length}`);
+  }
+
+  const data = {};
+
+  for (const part of parts) {
+    const [key, value] = part.split(":");
+    if (key === undefined || value === undefined) {
+      throw new ParseError(`Malformed field: ${part}`);
+    }
+    data[key] = value;
+  }
+
+  if (
+    data.T === undefined ||
+    data.X === undefined ||
+    data.Y === undefined ||
+    data.A === undefined ||
+    data.B === undefined ||
+    data.CHK === undefined
+  ) {
     throw new ParseError("Missing required fields");
   }
 
-  const providedChk = raw.slice(chkPos + chkMarker.length).trim().toUpperCase();
-  // compute checksum: sum of char codes of payload modulo 256, hex uppercase 2 digits
-  let sum = 0;
-  for (let i = 0; i < payload.length; i++) sum = (sum + payload.charCodeAt(i)) & 0xFF;
-  const expectedChk = sum.toString(16).toUpperCase().padStart(2, "0");
-  if (providedChk !== expectedChk) throw new ParseError("Checksum mismatch");
+  const t = Number(data.T);
+  const x = Number(data.X);
+  const y = Number(data.Y);
+  const a = Number(data.A);
+  const b = Number(data.B);
+  const chk = Number(data.CHK);
 
-  const x = Number(map.X);
-  const y = Number(map.Y);
-  if (!Number.isFinite(x) || !Number.isFinite(y)) throw new ParseError("Invalid numeric data");
-  if (x < -2048 || x > 2047 || y < -2048 || y > 2047) throw new ParseError("Out of expected range");
+  if (![t, x, y, a, b, chk].every(Number.isFinite)) {
+    throw new ParseError("Invalid numeric data");
+  }
 
-  const parseBool = (v) => {
-    const s = String(v).trim().toLowerCase();
-    if (s === "true" || s === "1") return true;
-    if (s === "false" || s === "0") return false;
+  if (x < -2048 || x > 2047 || y < -2048 || y > 2047) {
+    throw new ParseError("Out of expected range");
+  }
+
+  if (![0, 1].includes(a) || ![0, 1].includes(b)) {
     throw new ParseError("Invalid button data");
+  }
+
+  const calculatedChk = Math.abs(x) + Math.abs(y) + a + b;
+
+  if (calculatedChk !== chk) {
+    throw new ParseError(
+      `Corrupt frame: CHK=${chk}, expected=${calculatedChk}`
+    );
+  }
+
+  return {
+    x: x | 0,
+    y: y | 0,
+    btnA: a === 1,
+    btnB: b === 1,
   };
-
-  const btnA = parseBool(map.A);
-  const btnB = parseBool(map.B);
-
-  // optional timestamp if valid integer
-  const t = Number(map.T);
-  const time = Number.isFinite(t) ? (t | 0) : undefined;
-
-  return { x: x | 0, y: y | 0, btnA, btnB, t: time };
 }
-// ...existing code...
 
-
-class MicrobitAsciiAdapter extends BaseAdapter {
+class MicrobitAdapter2 extends BaseAdapter {
   constructor({ path, baud = 115200, verbose = false } = {}) {
     super();
     this.path = path;
@@ -198,7 +212,9 @@ class MicrobitAsciiAdapter extends BaseAdapter {
 
   async connect() {
     if (this.connected) return;
-    if (!this.path) throw new Error("serialPort is required for microbit device mode");
+    if (!this.path) {
+      throw new Error("serialPort is required for microbit device mode");
+    }
 
     this.port = new SerialPort({
       path: this.path,
@@ -230,6 +246,7 @@ class MicrobitAsciiAdapter extends BaseAdapter {
         });
       });
     }
+
     this.port = null;
     this.buf = "";
     this.onDisconnected?.("serial closed");
@@ -250,11 +267,15 @@ class MicrobitAsciiAdapter extends BaseAdapter {
       if (!line) continue;
 
       try {
-        const parsed = parseCsvLine(line);
+        const parsed = parseFrame(line);
         this.onData?.(parsed);
       } catch (e) {
         if (e instanceof ParseError) {
-          if (this.verbose) console.log("Bad data:", e.message, "raw:", line);
+          if (String(e.message).startsWith("Corrupt frame")) {
+            console.warn("[MicrobitAdapter2] Warning:", e.message, "raw:", line);
+          } else if (this.verbose) {
+            console.log("[MicrobitAdapter2] Bad data:", e.message, "raw:", line);
+          }
         } else {
           this._fail(e);
         }
@@ -294,7 +315,7 @@ class MicrobitAsciiAdapter extends BaseAdapter {
   }
 }
 
-module.exports = MicrobitAsciiAdapter2;
+module.exports = MicrobitAdapter2;
 
 ```
 <br>
@@ -503,206 +524,41 @@ function drawRunning() {
 }
 
 function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
     // si quieres mantener exactamente 720x720, puedes dejar esto vacío
 }
 ```
 </details>
 
-``` c++
-const { SerialPort } = require("serialport");
-const BaseAdapter = require("./BaseAdapter");
+<details>
+  <summary>Microbit</summary>
 
-class ParseError extends Error {}
+``` py
+from microbit import *
 
-function parseFrame(line) {
-  const trimmed = line.trim();
+uart.init(115200)
+display.set_pixel(0,0,9)
 
-  if (!trimmed.startsWith("$")) {
-    throw new ParseError("Frame does not start with $");
-  }
+startTime = running_time()
 
-  const body = trimmed.slice(1);
-  const parts = body.split("|");
-
-  if (parts.length !== 6) {
-    throw new ParseError(`Expected 6 fields, got ${parts.length}`);
-  }
-
-  const data = {};
-
-  for (const part of parts) {
-    const [key, value] = part.split(":");
-    if (key === undefined || value === undefined) {
-      throw new ParseError(`Malformed field: ${part}`);
-    }
-    data[key] = value;
-  }
-
-  if (
-    data.T === undefined ||
-    data.X === undefined ||
-    data.Y === undefined ||
-    data.A === undefined ||
-    data.B === undefined ||
-    data.CHK === undefined
-  ) {
-    throw new ParseError("Missing required fields");
-  }
-
-  const t = Number(data.T);
-  const x = Number(data.X);
-  const y = Number(data.Y);
-  const a = Number(data.A);
-  const b = Number(data.B);
-  const chk = Number(data.CHK);
-
-  if (![t, x, y, a, b, chk].every(Number.isFinite)) {
-    throw new ParseError("Invalid numeric data");
-  }
-
-  if (x < -2048 || x > 2047 || y < -2048 || y > 2047) {
-    throw new ParseError("Out of expected range");
-  }
-
-  if (![0, 1].includes(a) || ![0, 1].includes(b)) {
-    throw new ParseError("Invalid button data");
-  }
-
-  const calculatedChk = Math.abs(x) + Math.abs(y) + a + b;
-
-  if (calculatedChk !== chk) {
-    throw new ParseError(
-      `Corrupt frame: CHK=${chk}, expected=${calculatedChk}`
-    );
-  }
-
-  return {
-    x: x | 0,
-    y: y | 0,
-    btnA: a === 1,
-    btnB: b === 1,
-  };
-}
-
-class MicrobitAdapter2 extends BaseAdapter {
-  constructor({ path, baud = 115200, verbose = false } = {}) {
-    super();
-    this.path = path;
-    this.baud = baud;
-    this.port = null;
-    this.buf = "";
-    this.verbose = verbose;
-  }
-
-  async connect() {
-    if (this.connected) return;
-    if (!this.path) {
-      throw new Error("serialPort is required for microbit device mode");
-    }
-
-    this.port = new SerialPort({
-      path: this.path,
-      baudRate: this.baud,
-      autoOpen: false,
-    });
-
-    await new Promise((resolve, reject) => {
-      this.port.open((err) => (err ? reject(err) : resolve()));
-    });
-
-    this.connected = true;
-    this.onConnected?.(`serial open ${this.path} @${this.baud}`);
-
-    this.port.on("data", (chunk) => this._onChunk(chunk));
-    this.port.on("error", (err) => this._fail(err));
-    this.port.on("close", () => this._closed());
-  }
-
-  async disconnect() {
-    if (!this.connected) return;
-    this.connected = false;
-
-    if (this.port && this.port.isOpen) {
-      await new Promise((resolve, reject) => {
-        this.port.close((err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      });
-    }
-
-    this.port = null;
-    this.buf = "";
-    this.onDisconnected?.("serial closed");
-  }
-
-  getConnectionDetail() {
-    return `serial open ${this.path}`;
-  }
-
-  _onChunk(chunk) {
-    this.buf += chunk.toString("utf8");
-
-    let idx;
-    while ((idx = this.buf.indexOf("\n")) >= 0) {
-      const line = this.buf.slice(0, idx).trim();
-      this.buf = this.buf.slice(idx + 1);
-
-      if (!line) continue;
-
-      try {
-        const parsed = parseFrame(line);
-        this.onData?.(parsed);
-      } catch (e) {
-        if (e instanceof ParseError) {
-          if (String(e.message).startsWith("Corrupt frame")) {
-            console.warn("[MicrobitAdapter2] Warning:", e.message, "raw:", line);
-          } else if (this.verbose) {
-            console.log("[MicrobitAdapter2] Bad data:", e.message, "raw:", line);
-          }
-        } else {
-          this._fail(e);
-        }
-      }
-    }
-
-    if (this.buf.length > 4096) this.buf = "";
-  }
-
-  _fail(err) {
-    this.onError?.(String(err?.message || err));
-    this.disconnect();
-  }
-
-  _closed() {
-    if (!this.connected) return;
-    this.connected = false;
-    this.port = null;
-    this.buf = "";
-    this.onDisconnected?.("serial closed (event)");
-  }
-
-  async writeLine(line) {
-    if (!this.port || !this.port.isOpen) return;
-    await new Promise((resolve, reject) => {
-      this.port.write(line, (err) => (err ? reject(err) : resolve()));
-    });
-  }
-
-  async handleCommand(cmd) {
-    if (cmd?.cmd === "setLed") {
-      const x = Math.max(0, Math.min(4, Math.trunc(cmd.x)));
-      const y = Math.max(0, Math.min(4, Math.trunc(cmd.y)));
-      const v = Math.max(0, Math.min(9, Math.trunc(cmd.value)));
-      await this.writeLine(`LED,${x},${y},${v}\n`);
-    }
-  }
-}
-
-module.exports = MicrobitAdapter2;
+while True:
+    t = running_time()
+    xValue = accelerometer.get_x()
+    yValue = accelerometer.get_y()
+    aState = 1 if button_a.is_pressed() else 0
+    bState = 1 if button_b.is_pressed() else 0
+    checksum = abs(xValue) + abs(yValue) + aState + bState
+    
+    data = "$T:{}|X:{}|Y:{}|A:{}|B:{}|CHK:{}\n".format(t, xValue, yValue, aState, bState, checksum)
+    
+    uart.write(data)
+    
+    sleep(100) # Envia datos a 10 Hz
 ```
+</details>
 
 ## Bitácora de reflexión
 
 ### Actividad 03
+
 
