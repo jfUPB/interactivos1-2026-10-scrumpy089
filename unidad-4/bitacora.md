@@ -122,7 +122,8 @@ Ctrl + c = apagar servidor
 
 ### Actividad 02
 
-**MicrobitAdapter2.js**
+<details>
+  <summary><b>MicrobitAdapter2.js</b></summary>
 
 ``` js
 const { SerialPort } = require("serialport");
@@ -318,7 +319,7 @@ class MicrobitAdapter2 extends BaseAdapter {
 module.exports = MicrobitAdapter2;
 
 ```
-<br>
+</details>
 
 en `bridgeServer.js` agregar esto
 ``` js
@@ -326,7 +327,7 @@ const MicrobitAdapter2 = require("./adapters/MicrobitAdapter2");
 ```
 <br>
 
-y añadir esto en createAdapter()
+y añadir esto en `createAdapter()`
 ``` js
 return new MicrobitAdapter2({ path, baud: BAUD, verbose: VERBOSE });
 ```
@@ -525,13 +526,12 @@ function drawRunning() {
 
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
-    // si quieres mantener exactamente 720x720, puedes dejar esto vacío
 }
 ```
 </details>
 
 <details>
-  <summary>Microbit</summary>
+  <summary><b>Microbit</b></summary>
 
 ``` py
 from microbit import *
@@ -560,5 +560,6 @@ while True:
 ## Bitácora de reflexión
 
 ### Actividad 03
+
 
 
