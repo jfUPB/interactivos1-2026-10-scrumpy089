@@ -99,35 +99,53 @@ class MicrobitBinaryAdapter extends BaseAdapter {
   }
 
   _onChunk(chunk) {
+/*    
+1. Acumula bytes entrantes
+2. Busca el header (0xAA)
+3. Verifica si hay un paquete completo
+4. Valida checksum
+5. Extrae datos y los envía al sistema
+*/
+
+//Acumular datos seriales, garantiza que el paquete esté completo antes de procesar, y maneja casos de corrupción de datos o pérdida de sincronización.
     this.buf = Buffer.concat([this.buf, chunk]);
 
+    //Mientras haya datos en el buffer, intenta procesar varios paquetes.
     while (this.buf.length > 0){
+        //Buscar el header del paquete (0xAA)
         const headerIndex = this.buf.indexOf(0xAA);
 
+        //Si no se encuentra el header, descartar datos anteriores (posible corrupción) y esperar nuevos datos.
         if (headerIndex === -1){
             this.buf = Buffer.alloc(0);
             return;
         }
 
+        //Si el header no está al inicio del buffer, descartar datos anteriores para realinear con el inicio del paquete.
         if (headerIndex > 0){
             this.buf = this.buf.subarray(headerIndex);
         }
 
+        //Verificar si hay suficientes bytes para un paquete completo (8 bytes)
         if (this.buf.length < 8){
             return;
         }
 
+        //Extraer el paquete completo
         const packet = this.buf.subarray(0, 8);
 
+        //Validar checksum (suma de bytes 1 a 6 módulo 256 debe igualar byte 7(checksum))
         const receiveChk = packet[7];
         const calculatedChk = (packet[1] + packet[2] + packet[3] + packet[4] + packet[5] + packet[6]) % 256;
 
+        //Si el checksum no coincide, descartar el byte de header actual y continuar buscando el siguiente paquete para evitar desincronización.
         if (calculatedChk !== receiveChk){
             console.warn("Trama corrupta");
             this.buf = this.buf.subarray(1);
             continue;
         }
 
+        //Extraer datos de los paquetes (X, Y, btnA, btnB)
         const x = packet.readInt16BE(1);
         const y = packet.readInt16BE(3);
         const btnA = packet[5] === 1;
@@ -137,8 +155,6 @@ class MicrobitBinaryAdapter extends BaseAdapter {
         this.buf = this.buf.subarray(8);
 
     }
-
-    
   }
 
   _fail(err) {
@@ -173,6 +189,7 @@ class MicrobitBinaryAdapter extends BaseAdapter {
 
 module.exports = MicrobitBinaryAdapter;
 
+
 ```
 
 </DETAILS>
@@ -190,7 +207,7 @@ display.set_pixel(0,0,9)
 HEADER = 0xAA
 
 def int16_to_bytes(value):
-    # concertir enteros con signos a 2 bytes big endian
+    # convertir enteros con signos a 2 bytes big endian
 
     if value < 0:
         value = 65536 + value
