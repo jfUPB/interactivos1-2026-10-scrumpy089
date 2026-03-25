@@ -31,9 +31,32 @@
 
 ### Actividad 02
 
+<img width="1919" height="1023" alt="image" src="https://github.com/user-attachments/assets/129257dd-fc79-4d80-acf7-c9ef6e9cd675" /><br>
+
+**Comprobacion del checksum:**
+
+realizando un cambio en la configuracion del microbit sobre como se calcula el checksum
+<img width="714" height="117" alt="image" src="https://github.com/user-attachments/assets/44766373-fd9a-45f2-aa6c-94419c9098d0" /><br>
+
+se activa la siguiente linea:
+
+``` js
+if (calculatedChk !== receiveChk){
+            console.warn("Trama corrupta");
+            this.buf = this.buf.subarray(1);
+            continue;
+        }
+```
+el cual se ve reflejado el mensaje en la consola de gitbash
+<img width="827" height="300" alt="image" src="https://github.com/user-attachments/assets/1b980859-53b2-4a27-80b6-b7e0386c3bd7" />
+
+
+___
+---
+
 En `BridgeServer.js` eliminiar la mencion en `const MicrobitBinaryAdapter = require("./adapters/MicrobitBinaryAdapter");` y dentro de la funcion `createAdapter()` sobre `if (DEVICE === "microbit-bin")`
 
-se reutiliza el codigo de `MicrobitAdapter2.js` modificando la funcion `_onChunk(chunk)`, se puede eliminar la funcion de parseo porque ya no se trana de una linea de texto, y se cambia `this.buf = "";` por `this.buf = Buffer.alloc(0);` en todo el codigo
+se reutiliza el codigo de `MicrobitAdapter2.js` modificando la funcion `_onChunk(chunk)`, se puede eliminar la funcion de parseo porque ya no se trana de una linea de texto, y se cambia `this.buf = "";`(espacio de memoria que almacena texto) por `this.buf = Buffer.alloc(0);`(crea un espacio de memoria vacio donde se almacenan los bytes recibidos) en todo el codigo
 
 <DETAILS>
   <summary><b>MicrobitBinaryAdapter.js</b></summary>
