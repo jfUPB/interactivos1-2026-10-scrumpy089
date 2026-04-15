@@ -449,7 +449,7 @@ node bridgeServer.js --device strudel --wsPort 8081 --strudelPort 8080
 
 `strudelPort 8080` → Strudel manda eventos ahí
 
-en Strudel asegurarse que dentro de `$: stack ()`, esten el nombre del instrumento para que suene y tambien el nombre del instrumento + `.osc()` para emita los eventos para que el adapter del programa los reciba y genere las visuales
+en Strudel asegurarse que dentro de `$: stack ()`, esten el nombre del instrumento para que suene y tambien el nombre del instrumento + `.osc()` para emita las notas, no como audio sino como eventos/datos, para que el adapter del programa los reciba y genere las visuales
 ## Bitácora de reflexión
 
 ### Actividad 03
