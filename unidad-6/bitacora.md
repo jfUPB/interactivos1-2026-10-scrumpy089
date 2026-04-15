@@ -443,9 +443,13 @@ para conectarse usar en el Git Bash:
 ``` gitbash
 node bridgeServer.js --device strudel --wsPort 8081 --strudelPort 8080
 ```
-`device strudel` → usa tu nuevo adapter
+`device strudel` → usa el nuevo adapter
+
 `wsPort 8081` → frontend escucha ahí
+
 `strudelPort 8080` → Strudel manda eventos ahí
+
+en Strudel asegurarse que dentro de `$: stack ()`, esten el nombre del instrumento para que suene y tambien el nombre del instrumento + `.osc()` para emita los eventos para que el adapter del programa los reciba y genere las visuales
 ## Bitácora de reflexión
 
 ### Actividad 03
