@@ -450,6 +450,65 @@ node bridgeServer.js --device strudel --wsPort 8081 --strudelPort 8080
 `strudelPort 8080` → Strudel manda eventos ahí
 
 en Strudel asegurarse que dentro de `$: stack ()`, esten el nombre del instrumento para que suene y tambien el nombre del instrumento + `.osc()` para emita las notas, no como audio sino como eventos/datos, para que el adapter del programa los reciba y genere las visuales
+
 ## Bitácora de reflexión
 
 ### Actividad 03
+
+1 
+
+<img width="790" height="526" alt="image" src="https://github.com/user-attachments/assets/255d0069-1cc2-4385-a4e8-9bd5ef1d7575" />
+
+- El sistema comienza en Strudel, que genera eventos musicales en el navegador. Estos eventos no se toman como audio solamente, sino como datos temporizados. 
+
+- El StrudelAdapter recibe el mensaje crudo, valida su estructura y lo transforma en un contrato estable. 
+
+- Luego, el bridgeServer.js lo reenvía sin mezclar lógica visual. 
+
+- En el frontend, bridgeClient.js recibe el mensaje y lo entrega a la FSM.
+
+- La capa de estado actualiza una cola de eventos programados y, cuando el tiempo local alcanza el timestamp del evento, este se activa.
+
+- Finalmente, drawRunning dibuja la respuesta visual usando únicamente el estado ya calculado.
+
+2
+
+En la unidad 4 el reto era leer un formato textual proveniente del micro:bit. 
+
+En la unidad 5 el problema se volvió más complejo porque el mensaje pasó a ser binario y fue necesario resolver sincronización de bytes, framing y checksum. 
+
+En la unidad 6 el cambio principal ya no está tanto en el parseo, sino en la naturaleza temporal del evento: ahora no basta con recibir y traducir el dato, también hay que decidir cuándo debe ocurrir la respuesta visual.
+
+3
+
+Aunque en esta unidad la fuente de datos ya no sea hardware físico, la arquitectura sigue siendo la misma porque se conserva la misma lógica de separación de responsabilidades. Sigue existiendo una fuente externa de datos, sigue siendo necesario traducir el formato de entrada a un contrato comprensible para el sistema, sigue habiendo una capa de transporte y sigue existiendo una capa de frontend que transforma datos en estado y luego en imagen.
+
+Lo que cambió no fue la arquitectura, sino la naturaleza de la fuente. Antes el sistema recibía sensores y botones desde un dispositivo físico. Ahora recibe eventos musicales desde otra aplicación web. Sin embargo, el patrón arquitectónico sigue siendo equivalente: fuente externa → adapter → bridge → cliente → FSM/estado → render.
+
+Por eso esta unidad no rompe la continuidad del curso, sino que demuestra que la arquitectura construida en las unidades anteriores era lo suficientemente flexible para integrar otra clase de emisor sin rehacer todo el sistema.
+
+4
+
+Para traducir los eventos musicales en visualidad, decidí mapear principalmente la familia del sonido y la duración del evento.
+
+Mapeo usado
+bd → círculo grande central
+sd / cp → barra o flash horizontal
+hh → figuras pequeñas y rápidas
+oh → se agrupa visualmente con hi-hat o como variante ligera
+delta → duración de la animación
+timestamp → momento exacto en que debe activarse la respuesta visual
+
+**Justificación del mapeo**
+
+Este mapeo tiene sentido porque busca traducir propiedades rítmicas y perceptuales del sonido a propiedades visuales equivalentes.
+
+El bombo suele sentirse como un golpe grave, fuerte y centrado, así que un círculo grande que expande desde el centro representa bien esa sensación de impacto. 
+La caja y la palmada son sonidos más secos y cortantes, por eso una barra o flash ancho funciona mejor, ya que se perciben como un corte o golpe transversal. 
+Los hi-hats son sonidos cortos, brillantes y rápidos, así que visualmente se representan mejor con elementos pequeños, repetitivos y de corta duración.
+
+El uso de delta para controlar la duración visual también tiene sentido porque mantiene una relación directa entre el tiempo musical del evento y el tiempo de permanencia de la animación. De esta manera, la visualidad no es arbitraria, sino que responde a rasgos reales del evento musical.
+
+5
+
+<img width="1089" height="347" alt="image" src="https://github.com/user-attachments/assets/f074fe8d-a19f-48a5-87e5-7911d894dd78" />
