@@ -1,4 +1,4 @@
-[unidad7_controls.json](https://github.com/user-attachments/files/27210006/unidad7_controls.json)# Unidad 7
+# Unidad 7
 
 [ACTIVIDADES](https://juanferfranco.github.io/interactivos1-2026-10/units/unit7/)
 
@@ -1084,6 +1084,7 @@ Open Stage Control
 Send 127.0.0.1:9000
 Port 10010
 
+[unidad7_controls.json](https://github.com/user-attachments/files/27210006/unidad7_controls.json)
 
 
 
