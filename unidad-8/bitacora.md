@@ -65,8 +65,8 @@ if (msg.type === "microbit") {
       this.microbit.btnB = !!msg.btnB;
 
       // Inclinación convertida a desplazamiento visual
-      this.microbit.influenceX = map(msg.x, -2048, 2048, -2048, 2048);
-      this.microbit.influenceY = map(msg.y, -2048, 2048, -2048, 2048);
+      this.microbit.influenceX = map(msg.x, -1024, 1024, -250, 250);
+      this.microbit.influenceY = map(msg.y, -1024, 1024, -250, 250);
 
       // Escala SOLO mientras A esté presionado
       this.controls.scale =
