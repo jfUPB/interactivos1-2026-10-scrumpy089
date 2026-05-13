@@ -255,7 +255,7 @@ class PainterTask extends FSMTask {
 
       // Escala SOLO mientras A esté presionado
       this.microbit.scaleBoost =
-  this.microbit.btnA ? 2.2 : 1;
+  this.microbit.btnA ? 2 : 1;
 
       // Shake temporal con botón B
       if (this.microbit.btnB) {
@@ -495,48 +495,117 @@ function drawKick(anim, p) {
   circle(anim.x, anim.y, d);
 }
 
+function drawKick(anim, p) {
+  const s = painter.controls.scale * painter.microbit.scaleBoost;
+  const alpha = lerp(240, 0, p);
+  const radius = lerp(40, 280, p) * s;
+
+  push();
+  translate(anim.x, anim.y);
+
+  noFill();
+  stroke(anim.color[0], anim.color[1], anim.color[2], alpha);
+  strokeWeight(6 * s);
+  circle(0, 0, radius);
+
+  strokeWeight(2 * s);
+  circle(0, 0, radius * 0.55);
+
+  fill(anim.color[0], anim.color[1], anim.color[2], alpha * 0.35);
+  noStroke();
+  circle(0, 0, radius * 0.25);
+
+  pop();
+}
+
 function drawSnare(anim, p) {
   const s = painter.controls.scale * painter.microbit.scaleBoost;
-  const w = lerp(width, 0, p) * s;
   const alpha = lerp(255, 0, p);
+  const spread = lerp(20, width * 0.7, p) * s;
 
-  fill(anim.color[0], anim.color[1], anim.color[2], alpha);
-  rect(width / 2, height / 2, w, 50 * s);
+  push();
+  translate(width / 2, height / 2);
+
+  stroke(anim.color[0], anim.color[1], anim.color[2], alpha);
+  strokeWeight(4 * s);
+  noFill();
+
+  line(-spread, -40 * s, spread, 40 * s);
+  line(-spread, 40 * s, spread, -40 * s);
+
+  fill(anim.color[0], anim.color[1], anim.color[2], alpha * 0.25);
+  noStroke();
+  rect(0, 0, spread * 0.35, 22 * s);
+
+  pop();
 }
 
 function drawClap(anim, p) {
   const s = painter.controls.scale * painter.microbit.scaleBoost;
   const alpha = lerp(255, 0, p);
-  const offset = lerp(120, 0, p) * s;
+  const offset = lerp(160, 0, p) * s;
+  const h = lerp(180, 60, p) * s;
 
-  fill(anim.color[0], anim.color[1], anim.color[2], alpha);
+  push();
+  translate(anim.x, anim.y);
 
-  rect(anim.x - offset, anim.y, 80 * s, 160 * s);
-  rect(anim.x + offset, anim.y, 80 * s, 160 * s);
+  fill(anim.color[0], anim.color[1], anim.color[2], alpha * 0.45);
+  noStroke();
+
+  rect(-offset, 0, 50 * s, h);
+  rect(offset, 0, 50 * s, h);
+
+  stroke(anim.color[0], anim.color[1], anim.color[2], alpha);
+  strokeWeight(3 * s);
+  noFill();
+  line(-offset, -h / 2, offset, -h / 2);
+  line(-offset, h / 2, offset, h / 2);
+
+  pop();
 }
 
 function drawHat(anim, p) {
   const s = painter.controls.scale * painter.microbit.scaleBoost;
-  const sz = lerp(40, 0, p) * s;
   const alpha = lerp(255, 0, p);
+  const len = lerp(90, 10, p) * s;
 
-  fill(anim.color[0], anim.color[1], anim.color[2], alpha);
-  rect(anim.x, anim.y, sz, sz);
+  push();
+  translate(anim.x, anim.y);
+  rotate(p * TWO_PI * 2);
+
+  stroke(anim.color[0], anim.color[1], anim.color[2], alpha);
+  strokeWeight(2 * s);
+
+  line(-len, 0, len, 0);
+  line(0, -len, 0, len);
+
+  noFill();
+  circle(0, 0, len * 0.7);
+
+  pop();
 }
 
 function drawDefault(anim, p) {
   const s = painter.controls.scale * painter.microbit.scaleBoost;
-  const size = lerp(100, 0, p) * s;
-  const angle = p * TWO_PI;
-  const alpha = lerp(255, 0, p);
+  const alpha = lerp(220, 0, p);
+  const size = lerp(30, 180, p) * s;
 
+  push();
   translate(anim.x, anim.y);
-  rotate(angle);
+  rotate(p * TWO_PI);
 
-  stroke(anim.color[0], anim.color[1], anim.color[2], alpha);
-  strokeWeight(2);
   noFill();
-  rect(0, 0, size, size);
+  stroke(anim.color[0], anim.color[1], anim.color[2], alpha);
+  strokeWeight(3 * s);
+
+  beginShape();
+  vertex(0, -size);
+  vertex(size * 0.8, 0);
+  vertex(0, size);
+  vertex(-size * 0.8, 0);
+  endShape(CLOSE);
+
+  pop();
 }
 
 function getColorForFamily(family, controls) {
